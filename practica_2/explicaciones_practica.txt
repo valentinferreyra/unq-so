@@ -1,0 +1,14 @@
+1)
+    Lo que hace la clase InterrumptVector es almacenar en un map
+    los tipos de interrumption, donde la clave es el tipo y el valor es el handler del mismo.
+    Cuando una IRQ es solicitada, se busca en el map el tipo de interrumpción (que llega en IRQ)
+    y se ejecuta el handler, enviandole la misma IRQ.
+
+    La clase Clock es un observer, cuyos suscriptores son notificados cada vez que se realiza un click.
+    Clock comienza a notificar cuando el Hardware ejecuta la función switchOn, y una vez que se ejecuta switchOff, 
+    Clock detiene el contador y deja de notificar a sus suscriptores
+
+2)
+    La funcion KillInterruptionHandler.execute() se ejecuta cuando la CPU lee una instrucción de tipo 
+    INSTRUCTION_EXIT, entonces crea una IRQ y la envia al InterrumptVector, quien handlea esa IRQ dependiendo el tipo,
+    y lo ejecuta.
