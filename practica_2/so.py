@@ -3,8 +3,6 @@
 from hardware import *
 import log
 
-programQueue = []
-
 ## emulates a compiled program
 class Program():
 
@@ -62,9 +60,10 @@ class AbstractInterruptionHandler():
 class KillInterruptionHandler(AbstractInterruptionHandler):
 
     def execute(self, irq):
-        if programQueue:
-            log.logger.info(" Program finished, executing next program: {name}".format(name=programQueue[0].name))
-            self.kernel.run(programQueue.pop(0))
+        program = self.kernel.next_program()
+        if program:
+            log.logger.info(" Program Finished, executing next program: {name} ".format(name=program.name))
+            self.kernel.run(program)
         else:
             log.logger.info(" All program are finished, shutting down ")
             HARDWARE.switchOff()
@@ -77,6 +76,7 @@ class Kernel():
         ## setup interruption handlers
         killHandler = KillInterruptionHandler(self)
         HARDWARE.interruptVector.register(KILL_INTERRUPTION_TYPE, killHandler)
+        self._programQueue = []
 
     def load_program(self, program):
         # loads the program in main memory  
@@ -84,6 +84,12 @@ class Kernel():
         for index in range(0, progSize):
             inst = program.instructions[index]
             HARDWARE.memory.write(index, inst)
+            
+    def set_programs(self, programs):
+        self._programQueue = programs
+        
+    def next_program(self):
+        return self._programQueue.pop(0) if self._programQueue else None
 
     def run(self, program):
     ## emulates a "system call" for programs execution  
@@ -95,9 +101,8 @@ class Kernel():
         HARDWARE.cpu.pc = 0
 
     def executeBatch(self, programs):
-        global programQueue
-        programQueue = programs
-        self.run(programQueue.pop(0))
+        self.set_programs(programs)
+        self.run(self.next_program())
 
     def __repr__(self):
         return "Kernel "
